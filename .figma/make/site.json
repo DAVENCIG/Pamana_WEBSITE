@@ -1,0 +1,18 @@
+{
+  "title": "PAMANA · Alamin. Aralin. Tandaan.",
+  "description": "Mga aralin at pagsusulit sa Araling Panlipunan para sa Baitang 7 hanggang 10. Gumagana kahit offline.",
+  "language": "fil",
+  "icons": {
+    "icon": "/brand/pamana-favicon.png"
+  },
+  "customScripts": {
+    "headEnd": "<link rel=\"apple-touch-icon\" href=\"/brand/apple-touch-icon.png\"><meta name=\"theme-color\" content=\"#F7F1E6\">"
+  },
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

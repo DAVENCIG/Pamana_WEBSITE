@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  --color-cream: #f7f1e6;
+  --color-card: #fbf6ec;
+  --color-stroke: #e8dfc8;
+  --color-brown: #3d2a1e;
+  /* Dark-brown fill for buttons and brand panels; stays dark in dark mode, unlike text `brown`. */
+  --color-espresso: #3d2a1e;
+  /* Raised surfaces such as inputs and toggles. */
+  --color-surface: #ffffff;
+  --color-brown-dark: #241811;
+  --color-brown-light: #5c4033;
+  --color-brown-surface: #4e3728;
+  --color-gold: #d6952e;
+  --color-gold-light: #f4e9ce;
+  --color-gold-dark: #b3771b;
+  --color-gold-ink: #8a5a12;
+  --color-ink: #2c1e16;
+  --color-muted: #6e6358;
+  --color-on-dark: #faf5ec;
+  --color-success: #2e7d32;
+  --color-success-light: #e8f5e9;
+  --color-error: #c62828;
+  --color-error-light: #ffebee;
+  --color-option: #e3d8c6;
+  --color-option-selected: #f7eedc;
+  --color-track: #ebe1d0;
+
+  --animate-rise: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-toast: toast-in 0.25s ease-out both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+/* Dark theme: overrides the theme tokens, so every utility follows automatically. */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-cream: #17110d;
+  --color-card: #211913;
+  --color-surface: #2a2019;
+  --color-stroke: #3b2e24;
+  --color-brown: #f0e2cc;
+  --color-espresso: #4a3628;
+  --color-gold-light: #3b2b14;
+  --color-gold-ink: #eab662;
+  --color-ink: #efe6d8;
+  --color-muted: #b4a594;
+  --color-success: #74c87a;
+  --color-success-light: #1c3120;
+  --color-error: #f07a7a;
+  --color-error-light: #3a1d1d;
+  --color-option: #4a3a2e;
+  --color-option-selected: #33261b;
+  --color-track: #3a2d23;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  /* Text size preference; Tailwind sizes are rem-based, so everything scales. */
+  html[data-text-size='large'] {
+    font-size: 112.5%;
+  }
+  html[data-text-size='xlarge'] {
+    font-size: 125%;
+  }
+
+  html[data-theme='dark'] ::selection {
+    background: var(--color-gold);
+    color: var(--color-brown-dark);
+  }
+
+  /* "Bawasan ang galaw" setting, same effect as the OS reduced-motion preference. */
+  html[data-motion='reduce'] *,
+  html[data-motion='reduce'] *::before,
+  html[data-motion='reduce'] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--color-gold-light);
+    color: var(--color-brown-dark);
+  }
+
+  dialog::backdrop {
+    background: rgb(36 24 17 / 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Woven "banig" motif used as a subtle texture on dark brand surfaces. */
+@utility banig {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(214 149 46 / 0.07) 0 2px, transparent 2px 14px),
+    repeating-linear-gradient(-45deg, rgb(214 149 46 / 0.07) 0 2px, transparent 2px 14px);
+}
