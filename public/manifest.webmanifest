@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "PAMANA",
+  "short_name": "PAMANA",
+  "description": "Filipino educational learning platform for Grades 7–10.",
+  "lang": "fil",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#F7F1E6",
+  "background_color": "#F7F1E6",
+  "categories": ["education"],
+  "icons": [
+    { "src": "brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "brand/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Mga Aralin", "short_name": "Aralin", "url": "./topics", "icons": [{ "src": "brand/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Pagsusulit", "short_name": "Quiz", "url": "./quiz", "icons": [{ "src": "brand/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}

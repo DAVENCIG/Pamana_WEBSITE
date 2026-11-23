@@ -7,8 +7,11 @@ import {
   ScrollRestoration,
   useLocation,
 } from "react-router"
+import { BottomNav } from "../components/BottomNav"
 import { Wordmark } from "../components/Logo"
 import { PointsBadge } from "../components/PointsBadge"
+import { PwaStatus } from "../components/PwaStatus"
+import { AiBuddy } from "../components/AiBuddy"
 import { ToastProvider } from "../components/Toast"
 import { container, cx, eyebrow } from "../components/ui"
 import { CATEGORIES, categoryLabel, gradePath, grades } from "../data"
@@ -52,11 +55,16 @@ export default function Root() {
           {tr("Lumaktaw sa nilalaman", "Skip to content")}
         </a>
         <SiteHeader />
+        <PwaStatus />
         <main id="nilalaman" tabIndex={-1} className="flex-1 outline-none">
           <Outlet />
         </main>
         <SiteFooter />
+        {/* Spacer so the fixed bottom navigation never covers the footer. */}
+        <div className="h-[calc(3.5rem+1px+env(safe-area-inset-bottom))] lg:hidden" aria-hidden="true" />
       </div>
+      <BottomNav />
+      <AiBuddy />
       <ScrollRestoration />
     </ToastProvider>
   )

@@ -1,3 +1,4 @@
+import { ContinueLearning } from "../components/ContinueLearning"
 import {
   ArrowRight,
   ArrowUpRight,
@@ -111,6 +112,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <ContinueLearning />
 
       <section
         aria-label={tr("PAMANA sa bilang", "PAMANA in numbers")}

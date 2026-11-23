@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Chrome: dev server (hot reload)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "Dev server"
+    },
+    {
+      "name": "Chrome: built app (PWA + offline)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4173",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "Build and preview (test PWA/offline)"
+    }
+  ]
+}

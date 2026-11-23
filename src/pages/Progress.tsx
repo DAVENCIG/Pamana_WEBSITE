@@ -75,7 +75,7 @@ export default function Progress() {
             {greeting(new Date().getHours())}, {tr("Mag-aaral", "Learner")}!
           </h1>
           <p className="mt-2 text-muted">
-            {tr("Ang iyong progreso ay nakatago sa browser na ito lamang.", "Your progress is stored in this browser only.")}
+            {tr("Ang iyong progreso ay naka-save sa app na ito sa device na ito lamang.", "Your progress is saved only in this app on this device.")}
           </p>
         </div>
         <GradeTabs value={grade} onChange={setGrade} />
@@ -239,7 +239,7 @@ export default function Progress() {
             >
               {tr(`Progreso sa ${grade.title}`, `Progress in ${grade.title}`)}
             </h2>
-            <dl className="mt-5 space-y-4">
+            <ul className="mt-5 space-y-4">
               <ProgressStat
                 icon={BookOpenCheck}
                 label={tr("Mga aralin na nabasa", "Lessons read")}
@@ -258,7 +258,7 @@ export default function Progress() {
                 value={`${average}%`}
                 pct={average}
               />
-            </dl>
+            </ul>
           </section>
 
           <DailyChallengeCard compact />
@@ -335,15 +335,15 @@ function ProgressStat({
   pct: number
 }) {
   return (
-    <div>
+    <li>
       <div className="flex items-center gap-3">
         <span className="grid size-9 place-items-center rounded-xl bg-gold-light text-gold-ink">
           <Icon className="size-4" aria-hidden="true" />
         </span>
-        <dt className="flex-1 text-sm text-muted">{label}</dt>
-        <dd className="font-display text-lg font-semibold text-brown">
+        <span className="flex-1 text-sm text-muted">{label}</span>
+        <span className="font-display text-lg font-semibold text-brown">
           {value}
-        </dd>
+        </span>
       </div>
       <ProgressBar
         value={pct}
@@ -352,6 +352,6 @@ function ProgressStat({
         size="sm"
         className="mt-2.5"
       />
-    </div>
+    </li>
   )
 }

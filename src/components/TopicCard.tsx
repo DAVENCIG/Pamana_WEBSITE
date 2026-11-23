@@ -10,9 +10,11 @@ import { tr } from "../lib/i18n"
 interface TopicCardProps {
   topic: Topic
   progress: TopicProgress
+  /** Use "h2" on pages where the cards sit directly under the page's h1. */
+  headingLevel?: "h2" | "h3"
 }
 
-export function TopicCard({ topic, progress }: TopicCardProps) {
+export function TopicCard({ topic, progress, headingLevel: Heading = "h3" }: TopicCardProps) {
   return (
     <Link
       to={`/topics/${topic.id}`}
@@ -39,9 +41,9 @@ export function TopicCard({ topic, progress }: TopicCardProps) {
         <p className="text-xs font-semibold text-gold-ink">
           {getGrade(topic.gradeId)?.title}
         </p>
-        <h3 className="mt-1 font-display text-lg leading-snug font-semibold text-brown group-hover:text-gold-ink">
+        <Heading className="mt-1 font-display text-lg leading-snug font-semibold text-brown group-hover:text-gold-ink">
           {topic.title}
-        </h3>
+        </Heading>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
           {topic.description}
         </p>

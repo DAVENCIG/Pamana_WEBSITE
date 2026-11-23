@@ -132,7 +132,7 @@ export default function Topics() {
         <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((t) => (
             <li key={t.id}>
-              <TopicCard topic={t} progress={getTopicProgress(s, t.id)} />
+              <TopicCard topic={t} progress={getTopicProgress(s, t.id)} headingLevel="h2" />
             </li>
           ))}
         </ul>

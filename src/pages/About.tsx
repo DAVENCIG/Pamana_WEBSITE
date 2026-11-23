@@ -82,8 +82,8 @@ export default function About() {
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
               {tr(
-                "Ang PAMANA ay isang libreng educational website para sa mga mag-aaral ng Pilipinas. Tuklasin ang yaman ng ating kultura, kasaysayan, at panitikan sa pamamagitan ng mga masasayang aralin at pagsusulit.",
-                "PAMANA is a free educational website for Filipino students. Discover the richness of our culture, history, and literature through engaging lessons and quizzes.",
+                "Ang PAMANA ay isang libreng educational app para sa mga mag-aaral ng Pilipinas. Tuklasin ang yaman ng ating kultura, kasaysayan, at panitikan sa pamamagitan ng mga masasayang aralin at pagsusulit.",
+                "PAMANA is a free educational app for Filipino students. Discover the richness of our culture, history, and literature through engaging lessons and quizzes.",
               )}
             </p>
             <p className="mt-3 max-w-xl text-muted">
@@ -126,7 +126,7 @@ export default function About() {
               id="iyong-progreso"
               className="font-display text-lg font-semibold text-brown"
             >
-              {tr("Ang iyong progreso sa browser na ito", "Your progress in this browser")}
+              {tr("Ang iyong progreso sa app na ito", "Your progress in this app")}
             </h2>
             <p className="mt-2 text-sm text-muted">
               {tr(
@@ -141,8 +141,8 @@ export default function About() {
                   aria-hidden="true"
                 />
                 {tr(
-                  "Hindi ma-save ng browser ang iyong progreso (maaaring naka-private mode). Mawawala ito kapag isinara ang tab.",
-                  "Your browser can't save your progress (it may be in private mode). It will be lost when you close the tab.",
+                  "Hindi ma-save ng PAMANA ang iyong progreso (maaaring naka-private mode). Mawawala ito kapag isinara ang app.",
+                  "PAMANA can't save your progress (the app may be in private mode). It will be lost when you close the app.",
                 )}
               </p>
             )}
@@ -245,14 +245,14 @@ export default function About() {
         <div className="space-y-3">
           <p>
             {tr(
-              "Ang PAMANA ay isang offline-first na educational website. Hindi kami nangongolekta ng anumang personal na impormasyon, lokasyon, o datos mula sa iyong device.",
-              "PAMANA is an offline-first educational website. We do not collect any personal information, location, or data from your device.",
+              "Ang PAMANA ay isang offline-first na educational app. Hindi kami nangongolekta ng anumang personal na impormasyon o lokasyon mula sa iyong device.",
+              "PAMANA is an offline-first educational app. We do not collect personal information or location from your device.",
             )}
           </p>
           <p>
             {tr(
-              "Lahat ng iyong progreso sa pag-aaral (napiling grade, wika, puntos, at resulta ng quiz) ay lokal na nakaimbak lamang sa browser na ito at hindi ipinapadala sa alinmang server. Maaari mo itong burahin anumang oras gamit ang “I-reset ang Progreso.”",
-              "All of your learning progress (selected grade, language, points, and quiz results) is stored locally in this browser only and is never sent to any server. You can erase it anytime with “Reset Progress.”",
+              "Lahat ng iyong progreso sa pag-aaral (napiling grade, wika, puntos, at resulta ng quiz) ay nakaimbak lamang sa app na ito sa device na ito at hindi ipinapadala sa server. Kapag gumamit ka ng AI Buddy, ipinapadala ang mga tanong mo sa PAMANA server at OpenAI para makabuo ng sagot. Maaaring hindi lumabas sa ibang device o kopya ng app ang iyong progreso. Maaari mo itong burahin anumang oras gamit ang “I-reset ang Progreso.”",
+              "Your learning progress (selected grade, language, points, and quiz results) is stored only in this app on this device and is never sent to a server. If you use AI Buddy, your questions are sent to PAMANA's server and OpenAI to generate replies. Your progress may not appear on another device or app installation. You can erase it anytime with “Reset Progress.”",
             )}
           </p>
           <p className="text-muted">
@@ -272,8 +272,8 @@ export default function About() {
       >
         <p>
           {tr(
-            "Ang website na ito ay dinisenyo at binuo para sa mga mag-aaral ng Baitang 7 hanggang 10 sa ilalim ng kurikulum ng Araling Panlipunan ng Kagawaran ng Edukasyon (DepEd). Ang nilalaman ay libreng magagamit para sa pansariling pag-aaral at edukasyon nang walang kinakailangang koneksyon sa internet.",
-            "This website was designed and built for Grade 7 to 10 students under the Araling Panlipunan (Social Studies) curriculum of the Department of Education (DepEd). The content is free to use for personal study and education, with no internet connection required.",
+            "Ang app na ito ay dinisenyo at binuo para sa mga mag-aaral ng Baitang 7 hanggang 10 sa ilalim ng kurikulum ng Araling Panlipunan ng Kagawaran ng Edukasyon (DepEd). Ang nilalaman ay libreng magagamit para sa pansariling pag-aaral at edukasyon nang walang kinakailangang koneksyon sa internet.",
+            "This app was designed and built for Grade 7 to 10 students under the Araling Panlipunan (Social Studies) curriculum of the Department of Education (DepEd). The content is free to use for personal study and education, with no internet connection required.",
           )}
         </p>
       </Dialog>
@@ -351,8 +351,8 @@ export default function About() {
         icon={<TriangleAlert className="size-5" aria-hidden="true" />}
         title={tr("I-reset ang progreso?", "Reset progress?")}
         message={tr(
-          "Mabubura ang iyong puntos, napiling grade, mga nabasang aralin, at lahat ng resulta ng quiz sa browser na ito. Hindi na ito maibabalik.",
-          "Your points, selected grade, lessons read, and all quiz results in this browser will be erased. This can't be undone.",
+          "Mabubura ang iyong puntos, napiling grade, mga nabasang aralin, at lahat ng resulta ng quiz sa app na ito. Hindi na ito maibabalik.",
+          "Your points, selected grade, lessons read, and all quiz results in this app will be erased. This can't be undone.",
         )}
         cancelLabel={tr("Huwag", "Cancel")}
         confirmLabel={tr("I-reset", "Reset")}

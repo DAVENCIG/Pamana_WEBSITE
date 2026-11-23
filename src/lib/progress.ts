@@ -9,6 +9,7 @@ import {
 } from "../data"
 import { evaluateBadges } from "./achievements"
 import { todayKey } from "./date"
+import { sanitizeProgress } from "./progressSchema"
 
 export const INITIAL_POINTS = 50
 export const POINTS_PER_CORRECT = 10
@@ -116,28 +117,25 @@ function defaults(): ProgressState {
 }
 
 /** Parses saved progress JSON; returns null when it is not a valid version-1 save. */
-function parse(raw: string): ProgressState | null {
+function parse(raw: string, importing = false): ProgressState | null {
   try {
-    const parsed = JSON.parse(raw) as Partial<ProgressState>
-    if (parsed?.version !== 1) return null
-    const base = defaults()
-    return {
-      ...base,
-      ...parsed,
-      // Learners from before the counter existed still get credit for a finished challenge.
-      challengeCount:
-        parsed.challengeCount ?? (parsed.challengeCompletedOn ? 1 : 0),
-      quizSettings: { ...base.quizSettings, ...parsed.quizSettings },
-    }
+    return sanitizeProgress(JSON.parse(raw), defaults(), importing ? (id) => !!getTopic(id) : undefined)
   } catch {
     return null
   }
 }
 
+const CORRUPT_KEY = "pamana.progress.v1.corrupt"
+
 function load(): ProgressState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    return (raw && parse(raw)) || defaults()
+    if (!raw) return defaults()
+    const parsed = parse(raw)
+    if (parsed) return parsed
+    // Unreadable save: keep a copy before the next write replaces it, so it can be recovered.
+    if (!window.localStorage.getItem(CORRUPT_KEY)) window.localStorage.setItem(CORRUPT_KEY, raw)
+    return defaults()
   } catch {
     return defaults()
   }
@@ -476,9 +474,20 @@ export const progress = {
     return JSON.stringify(state, null, 2)
   },
 
+  /** Validates a backup without applying it; returns what it contains, or null if invalid. */
+  previewBackup(raw: string): { points: number; lessonsRead: number; attempts: number } | null {
+    const next = parse(raw, true)
+    if (!next) return null
+    return {
+      points: next.points,
+      lessonsRead: Object.values(next.topics).filter((t) => t.lessonRead).length,
+      attempts: next.attempts.length,
+    }
+  },
+
   /** Replaces progress with a backup. Returns false if the file is not a PAMANA backup. */
   importBackup(raw: string): boolean {
-    const next = parse(raw)
+    const next = parse(raw, true)
     if (!next) return false
     commit(next)
     return true

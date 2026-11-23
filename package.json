@@ -1,13 +1,18 @@
 {
-  "name": "figma-make-app",
+  "name": "pamana",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "vite",
+    "pwa": "vite build && vite preview",
+    "check": "tsc --noEmit && vitest run && vite build"
   },
   "dependencies": {
     "lucide-react": "^1.66.0",
@@ -24,6 +29,11 @@
     "oxfmt": "^0.2.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
-    "vite": "^8.0.5"
+    "vite": "^8.0.5",
+    "vitest": "^5.1.1"
+  },
+  "packageManager": "pnpm@10.34.3",
+  "engines": {
+    "node": ">=22"
   }
 }

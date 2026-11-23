@@ -2,6 +2,8 @@ import {
   Check,
   Download,
   HardDrive,
+  Smartphone,
+  Wifi,
   Languages,
   ListChecks,
   Monitor,
@@ -9,14 +11,15 @@ import {
   RotateCcw,
   ShieldCheck,
   Sun,
+  Sparkles,
   Trash2,
   TriangleAlert,
   Type,
   Upload,
   type LucideIcon,
 } from "lucide-react"
-import { useRef, useState, type ReactNode } from "react"
-import { Link } from "react-router"
+import { useEffect, useRef, useState, type ReactNode } from "react"
+import { Link, useLocation } from "react-router"
 import { ConfirmDialog } from "../components/Dialog"
 import { Switch } from "../components/Switch"
 import { useToast } from "../components/Toast"
@@ -31,7 +34,9 @@ import {
   type Theme,
 } from "../lib/preferences"
 import { isProgressPersistent, progress, useProgress } from "../lib/progress"
+import { detectPlatform, promptInstall, usePwa } from "../lib/pwa"
 import { usePageTitle } from "../lib/usePageTitle"
+import { clearLegacyAiConfig } from "../lib/aiBuddy"
 
 type Confirm = "progress" | "everything" | "cache" | null
 
@@ -39,6 +44,8 @@ const SECTIONS = () => [
   { id: "wika", label: tr("Wika", "Language") },
   { id: "hitsura", label: tr("Hitsura", "Appearance") },
   { id: "pagsusulit", label: tr("Pagsusulit", "Quizzes") },
+  { id: "ai-buddy", label: tr("AI Buddy", "AI Buddy") },
+  { id: "app", label: tr("App at Offline", "App & Offline") },
   { id: "datos", label: tr("Datos at Privacy", "Data & Privacy") },
 ]
 
@@ -50,6 +57,28 @@ export default function Settings() {
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirm, setConfirm] = useState<Confirm>(null)
+  const [pendingBackup, setPendingBackup] = useState<{
+    raw: string
+    points: number
+    lessonsRead: number
+    attempts: number
+  } | null>(null)
+  const pwa = usePwa()
+  const { hash } = useLocation()
+  // Lazy-loaded pages mount after the browser's own anchor scroll, so scroll to #section here.
+  useEffect(() => {
+    if (!hash) return
+    const el = document.getElementById(decodeURIComponent(hash.slice(1)))
+    el?.scrollIntoView({ block: "start" })
+  }, [hash])
+  const [storage, setStorage] = useState<string | null>(null)
+  useEffect(() => {
+    void navigator.storage?.estimate?.().then(({ usage, quota }) => {
+      if (usage === undefined) return
+      const mb = (n: number) => (n / 1048576).toFixed(n >= 10485760 ? 0 : 1)
+      setStorage(quota ? `${mb(usage)} MB / ${mb(quota)} MB` : `${mb(usage)} MB`)
+    }).catch(() => undefined)
+  }, [])
   const persistent = isProgressPersistent()
   const attempts = s.attempts.length
   const lessonsRead = Object.values(s.topics).filter((t) => t.lessonRead).length
@@ -65,8 +94,24 @@ export default function Settings() {
     toast(tr("Na-download ang backup ng iyong progreso.", "Your progress backup was downloaded."))
   }
 
-  const restoreBackup = async (file: File) => {
-    const ok = progress.importBackup(await file.text())
+  const MAX_BACKUP_BYTES = 5 * 1024 * 1024
+
+  // Step 1: read and validate the file without touching current progress.
+  const chooseBackup = async (file: File) => {
+    const invalid = () =>
+      toast(tr("Hindi ito wastong backup file ng PAMANA.", "That isn't a valid PAMANA backup file."), "info")
+    if (file.size > MAX_BACKUP_BYTES) return invalid()
+    const raw = await file.text()
+    const summary = progress.previewBackup(raw)
+    if (!summary) return invalid()
+    setPendingBackup({ raw, ...summary })
+  }
+
+  // Step 2: only after the learner confirms is the current progress replaced.
+  const restoreBackup = () => {
+    if (!pendingBackup) return
+    const ok = progress.importBackup(pendingBackup.raw)
+    setPendingBackup(null)
     toast(
       ok
         ? tr("Naibalik ang iyong progreso mula sa backup.", "Your progress was restored from the backup.")
@@ -98,6 +143,7 @@ export default function Settings() {
   const resetEverything = () => {
     progress.reset()
     resetPreferences()
+    clearLegacyAiConfig()
     setLang("tl")
     toast(tr("Nabura ang lahat ng datos at setting.", "All data and settings were erased."), "info")
   }
@@ -111,8 +157,8 @@ export default function Settings() {
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-ink/80">
           {tr(
-            "Iangkop ang PAMANA sa paraang pinakakomportable sa iyo. Awtomatikong nase-save ang mga pagbabago sa browser na ito.",
-            "Make PAMANA work the way that's most comfortable for you. Changes are saved automatically in this browser.",
+            "Iangkop ang PAMANA sa paraang pinakakomportable sa iyo. Awtomatikong nase-save ang mga pagbabago sa app na ito sa device na ito.",
+            "Make PAMANA work the way that's most comfortable for you. Changes are saved automatically in this app on this device.",
           )}
         </p>
       </header>
@@ -139,8 +185,8 @@ export default function Settings() {
             icon={Languages}
             title={tr("Wika", "Language")}
             description={tr(
-              "Nagbabago ang buong website, kasama ang mga aralin, pagsusulit, at talahuluganan.",
-              "Changes the whole website, including lessons, quizzes, and the glossary.",
+              "Nagbabago ang buong app, kasama ang mga aralin, pagsusulit, at talahuluganan.",
+              "Changes the whole app, including lessons, quizzes, and the glossary.",
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -263,12 +309,102 @@ export default function Settings() {
           </Section>
 
           <Section
+            id="ai-buddy"
+            icon={Sparkles}
+            title={tr("PAMANA AI Buddy", "PAMANA AI Buddy")}
+            description={tr(
+              "Magtanong tungkol sa Araling Panlipunan nang hindi naglalagay ng sariling API key.",
+              "Ask about Araling Panlipunan without entering your own API key.",
+            )}
+          >
+            <p className="rounded-2xl border border-stroke bg-card p-5 text-sm leading-relaxed text-ink">
+              {tr(
+                "Awtomatikong ikinokonekta ng PAMANA ang AI Buddy gamit ang ligtas na server setting. Kapag nagtanong ka, ipinapadala ang mensahe sa PAMANA server at OpenAI para makabuo ng sagot. Huwag magpadala ng sensitibong impormasyon.",
+                "PAMANA connects the AI Buddy using a secure server setting. When you ask a question, your message is sent to PAMANA's server and OpenAI to generate a reply. Do not send sensitive information.",
+              )}
+            </p>
+          </Section>
+
+          <Section
+            id="app"
+            icon={Smartphone}
+            title={tr("App at Offline", "App & Offline")}
+            description={tr(
+              "I-install ang PAMANA at gamitin kahit walang internet.",
+              "Install PAMANA and keep learning without internet.",
+            )}
+          >
+            <div className="rounded-2xl border border-stroke bg-card p-5">
+              <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Smartphone className="size-4 text-gold-ink" aria-hidden="true" />
+                {pwa.installed
+                  ? tr("Naka-install ang PAMANA sa device na ito.", "PAMANA is installed on this device.")
+                  : tr("I-install ang PAMANA", "Install PAMANA")}
+              </p>
+              {!pwa.installed && (
+                <>
+                  {pwa.canInstall ? (
+                    <button
+                      type="button"
+                      className={buttonClass("gold", "md", "mt-4")}
+                      onClick={() => void promptInstall()}
+                    >
+                      <Download className="size-4" aria-hidden="true" />
+                      {tr("I-install ang PAMANA", "Install PAMANA")}
+                    </button>
+                  ) : (
+                    <InstallSteps />
+                  )}
+                </>
+              )}
+            </div>
+            <ul className="divide-y divide-stroke overflow-hidden rounded-2xl border border-stroke">
+              <ActionRow
+                icon={Wifi}
+                title={tr("Koneksyon", "Connection")}
+                description={
+                  pwa.online
+                    ? tr("Online. Naka-save sa device ang progreso mo.", "Online. Your progress is saved on this device.")
+                    : tr(
+                        "Offline. Gumagana ang mga aralin at quiz na na-save na.",
+                        "Offline. Lessons and quizzes that were already saved still work.",
+                      )
+                }
+                action={
+                  <span
+                    className={cx(
+                      "rounded-full px-3 py-1 text-xs font-bold",
+                      pwa.online ? "bg-success-light text-success" : "bg-gold-light text-gold-ink",
+                    )}
+                  >
+                    {pwa.online ? "Online" : "Offline"}
+                  </span>
+                }
+              />
+              <ActionRow
+                icon={HardDrive}
+                title={tr("Gamit na storage", "Storage used")}
+                description={
+                  storage ?? tr("Hindi ito maipakita ng app na ito.", "This app can't report storage use.")
+                }
+                action={<span className="text-xs font-semibold text-muted">v{__APP_VERSION__}</span>}
+              />
+            </ul>
+            <p className="text-xs leading-relaxed text-muted">
+              {tr(
+                "Nase-save ang mga aralin at quiz para sa offline pagkatapos ng unang matagumpay na pagbisita online. Maaaring kailanganin ng internet ang ilang larawan hanggang mabuksan mo ang mga ito nang isang beses.",
+                "Lessons and quizzes are saved for offline use after your first successful visit online. Some photos may need internet until you've opened them once.",
+              )}
+            </p>
+          </Section>
+
+          <Section
             id="datos"
             icon={ShieldCheck}
             title={tr("Datos at Privacy", "Data & Privacy")}
             description={tr(
-              "Walang account at walang ipinapadala sa server. Lahat ng datos ay nasa browser na ito lamang.",
-              "No account and nothing is sent to a server. All data stays in this browser only.",
+              "Walang account. Nananatili sa device ang progreso mo; ipinapadala lamang sa AI provider ang mga tanong sa AI Buddy.",
+              "No account. Your progress stays on this device; only AI Buddy questions are sent to the AI provider.",
             )}
           >
             <div className="rounded-2xl border border-stroke bg-card p-5">
@@ -295,20 +431,27 @@ export default function Settings() {
                 <p className="mt-4 flex gap-2 rounded-xl bg-error-light p-3 text-sm text-error">
                   <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                   {tr(
-                    "Hindi ma-save ng browser ang iyong progreso (maaaring naka-private mode). Mag-download ng backup bago isara ang tab.",
-                    "Your browser can't save your progress (it may be in private mode). Download a backup before closing the tab.",
+                    "Hindi ma-save ng PAMANA ang iyong progreso (maaaring naka-private mode). Mag-download ng backup bago isara ang app.",
+                    "PAMANA can't save your progress (the app may be in private mode). Download a backup before closing the app.",
                   )}
                 </p>
               )}
             </div>
+
+            <p className="rounded-2xl border border-stroke bg-card p-5 text-sm leading-relaxed text-muted">
+              {tr(
+                "Kapag gumamit ka ng AI Buddy, ipinapadala ang mensahe mo sa PAMANA server at OpenAI para makabuo ng sagot. Huwag maglagay ng password o sensitibong personal na impormasyon.",
+                "When you use AI Buddy, your message is sent to PAMANA's server and OpenAI to generate a reply. Do not include passwords or sensitive personal information.",
+              )}
+            </p>
 
             <ul className="divide-y divide-stroke overflow-hidden rounded-2xl border border-stroke">
               <ActionRow
                 icon={Download}
                 title={tr("I-download ang backup", "Download a backup")}
                 description={tr(
-                  "I-save ang iyong progreso bilang file para mailipat sa ibang device o browser.",
-                  "Save your progress as a file to move it to another device or browser.",
+                  "I-save ang iyong progreso bilang file para mailipat sa ibang device o kopya ng app.",
+                  "Save your progress as a file to move it to another device or app installation.",
                 )}
                 action={
                   <button type="button" className={buttonClass("outline", "sm")} onClick={downloadBackup}>
@@ -320,8 +463,8 @@ export default function Settings() {
                 icon={Upload}
                 title={tr("Ibalik mula sa backup", "Restore from a backup")}
                 description={tr(
-                  "Papalitan ng file ang kasalukuyang progreso sa browser na ito.",
-                  "The file replaces the current progress in this browser.",
+                  "Papalitan ng file ang kasalukuyang progreso sa app na ito.",
+                  "The file replaces the current progress in this app.",
                 )}
                 action={
                   <>
@@ -334,7 +477,7 @@ export default function Settings() {
                       aria-hidden="true"
                       onChange={(e) => {
                         const file = e.target.files?.[0]
-                        if (file) void restoreBackup(file)
+                        if (file) void chooseBackup(file)
                         e.target.value = ""
                       }}
                     />
@@ -395,6 +538,20 @@ export default function Settings() {
         </div>
       </div>
 
+      <ConfirmDialog
+        open={pendingBackup !== null}
+        onClose={() => setPendingBackup(null)}
+        onConfirm={restoreBackup}
+        destructive
+        icon={<Upload className="size-5" aria-hidden="true" />}
+        title={tr("Palitan ang kasalukuyang progreso?", "Replace your current progress?")}
+        message={tr(
+          `Ang backup ay may ${pendingBackup?.points ?? 0} puntos, ${pendingBackup?.lessonsRead ?? 0} nabasang aralin, at ${pendingBackup?.attempts ?? 0} subok sa quiz. Papalitan nito ang progreso sa app na ito.`,
+          `The backup has ${pendingBackup?.points ?? 0} points, ${pendingBackup?.lessonsRead ?? 0} lessons read, and ${pendingBackup?.attempts ?? 0} quiz attempts. It will replace the progress in this app.`,
+        )}
+        cancelLabel={tr("Huwag", "Cancel")}
+        confirmLabel={tr("Ibalik", "Restore")}
+      />
       <ConfirmDialog
         open={confirm === "cache"}
         onClose={() => setConfirm(null)}
@@ -555,5 +712,42 @@ function ActionRow({
       </div>
       <div className="shrink-0">{action}</div>
     </li>
+  )
+}
+
+function InstallSteps() {
+  const platform = detectPlatform()
+  const steps =
+    platform === "ios"
+      ? [
+          tr("Buksan ang PAMANA sa Safari.", "Open PAMANA in Safari."),
+          tr("I-tap ang Share (ang parisukat na may arrow paitaas).", "Tap Share (the square with an upward arrow)."),
+          tr("Piliin ang “Add to Home Screen”, pagkatapos ay “Add”.", "Choose “Add to Home Screen”, then “Add”."),
+        ]
+      : platform === "android"
+        ? [
+            tr("Buksan ang menu ng browser (⋮).", "Open the browser menu (⋮)."),
+            tr("Piliin ang “Install app” o “Add to Home screen”.", "Choose “Install app” or “Add to Home screen”."),
+          ]
+        : [
+            tr(
+              "Sa Chrome o Edge, hanapin ang install icon sa address bar, o buksan ang menu at piliin ang “Install PAMANA”.",
+              "In Chrome or Edge, look for the install icon in the address bar, or open the menu and choose “Install PAMANA”.",
+            ),
+          ]
+  return (
+    <div className="mt-3 text-sm text-ink/80">
+      <p>
+        {tr(
+          "Hindi nagbibigay ang browser na ito ng install button. Ganito:",
+          "This browser doesn't offer an install button. Here's how:",
+        )}
+      </p>
+      <ol className="mt-2 list-decimal space-y-1 pl-5">
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+    </div>
   )
 }
