@@ -33,14 +33,14 @@ To try it on a phone, use the **Network** address printed in the terminal while 
 
 ## Configure the AI Buddy on Cloudflare Pages
 
-The AI Buddy uses the Cloudflare Pages Function at `functions/api/chat.ts`. It needs an OpenAI API key configured as a server-side secret; never add the key to app code or `VITE_*` variables.
+The AI Buddy uses the Cloudflare Pages Function at `functions/api/chat.ts` and Cloudflare Workers AI. No provider API key is required.
 
-1. Deploy this project to Cloudflare Pages with the build command `pnpm build` and output directory `dist`.
-2. In the Cloudflare dashboard, open the Pages project **Settings → Variables and Secrets**. Add `OPENAI_API_KEY` as an encrypted secret for the production environment (and preview too, only if previews should use the AI).
-3. Configure a Cloudflare rate-limiting rule for `POST /api/chat` before sharing the app publicly, and set a usage budget/alert with your AI provider. Requests are billed to the account that owns the key.
-4. Redeploy the Pages project so the Function can read the secret.
+1. Deploy this project to Cloudflare Pages with the build command `pnpm run build` and output directory `dist`.
+2. In the Cloudflare dashboard, open the Pages project **Settings → Bindings → Add → Workers AI**. Set **Variable name** to `AI`. Configure production and preview separately if both environments should use AI.
+3. Redeploy the Pages project so the Function can use the binding.
+4. Configure rate limiting for `POST /api/chat` before sharing the app publicly. Workers AI usage may be subject to Cloudflare plan limits or charges.
 
-Learners do not need to enter a key. Their AI questions are sent to the PAMANA Function and OpenAI; learning progress remains local to the app. The AI Buddy is unavailable in the local Vite dev server and static-only preview unless the Pages Function is deployed.
+Learners do not need to enter a key. Their AI questions are sent to the PAMANA Function and Cloudflare Workers AI; learning progress remains local to the app. The AI Buddy is unavailable in the local Vite dev server and static-only preview unless the Pages Function is deployed.
 
 ## Commands
 

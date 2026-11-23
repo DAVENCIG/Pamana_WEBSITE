@@ -17,7 +17,7 @@ React 19, TypeScript (strict), Vite 8, Tailwind CSS 4, React Router 8, Lucide Re
 - `src/pages/`, `src/components/`, `src/data/` (curriculum, images), `src/lib/`
 - `src/lib/progress.ts` – learner state store (`pamana.progress.v1`); `progressSchema.ts` – pure validation used for load and backup import
 - `src/lib/pwa.ts` – install prompt, installed/online/update state; `serviceWorker.ts` – registration and update activation
-- `functions/api/chat.ts` – Cloudflare Pages AI proxy; reads `OPENAI_API_KEY` from a server-side secret and never exposes it to the client
+- `functions/api/chat.ts` – Cloudflare Pages AI proxy; uses the `AI` Workers AI binding and never exposes provider credentials to the client
 - `public/sw.js`, `public/manifest.webmanifest`, `public/brand/` (logo, mascot, icons)
 - `vite.config.ts` – React + Tailwind plugins and `pamanaServiceWorker()`, which injects the build id and the full file list into `dist/sw.js`; also injects `__APP_VERSION__`
 
@@ -38,7 +38,7 @@ React 19, TypeScript (strict), Vite 8, Tailwind CSS 4, React Router 8, Lucide Re
 - Not tested on real devices: install prompt, standalone mode and iOS Safari were only checked with a headless browser and a simulated prompt.
 - No manifest `screenshots` yet; capture real ones from a device with photos and fonts loaded.
 - Remote lesson photos work offline only after they have been viewed once.
-- AI Buddy requires the Cloudflare Pages Function and an encrypted `OPENAI_API_KEY` secret; configure rate limiting for `POST /api/chat` before making the deployment public. AI questions are sent to OpenAI, while learner progress remains local.
+- AI Buddy requires the Cloudflare Pages Function and a Workers AI binding named `AI`; configure rate limiting for `POST /api/chat` before making the deployment public. AI questions are sent to Cloudflare Workers AI, while learner progress remains local.
 - Desktop keeps the top navigation (no sidebar).
 - `index.html` has `<meta name="robots" content="noindex, nofollow">` and `public/robots.txt` disallows everything, so Lighthouse SEO shows "not crawlable". Remove both if the site should be indexed.
 - Remaining axe finding: decorative `aria-hidden` card numerals have low contrast (design choice).

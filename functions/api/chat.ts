@@ -1,5 +1,14 @@
 interface Env {
-  OPENAI_API_KEY?: string
+  AI?: {
+    run(
+      model: string,
+      input: {
+        messages: Array<{ role: "system" | "user" | "assistant"; content: string }>
+        max_tokens: number
+        temperature: number
+      },
+    ): Promise<unknown>
+  }
 }
 
 interface ChatMessage {
@@ -7,6 +16,7 @@ interface ChatMessage {
   content: string
 }
 
+const MODEL = "@cf/openai/gpt-oss-20b"
 const MAX_MESSAGES = 12
 const MAX_MESSAGE_LENGTH = 2000
 const MAX_TOTAL_LENGTH = 8000
@@ -23,7 +33,7 @@ export async function onRequestPost({
     return json({ error: "Request origin is not allowed." }, 403)
   }
 
-  if (!env.OPENAI_API_KEY) {
+  if (!env.AI) {
     return json({ error: "The AI service has not been configured yet." }, 503)
   }
 
@@ -43,39 +53,30 @@ export async function onRequestPost({
       ? "Ikaw ay Kaibigang PAMANA, isang magalang at masayang Filipino Araling Panlipunan tutor para sa mga estudyanteng baitang 7 hanggang 10. Ipaliwanag nang simple, tiyakin ang katumpakan, at hikayatin ang kritikal na pag-iisip. Huwag gumawa ng mga sagot na tiyak na wala sa ibinigay na konteksto; sa halip, ipaliwanag kung ano ang dapat hanapin sa aralin. Gumamit ng Tagalog at Taglish na natural."
       : "You are PAMANA Buddy, a friendly Araling Panlipunan tutor for Filipino students in Grades 7 to 10. Explain simply, stay accurate, and encourage critical thinking. Do not invent specific facts when they are outside the provided context; suggest what to look for in the lesson instead. Respond in clear English."
 
-  let upstream: Response
+  let result: unknown
   try {
-    upstream = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...body.messages,
-        ],
-        max_tokens: 500,
-        temperature: 0.5,
-      }),
+    result = await env.AI.run(MODEL, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...body.messages,
+      ],
+      max_tokens: 500,
+      temperature: 0.5,
     })
   } catch {
     return json({ error: "The AI service could not be reached. Please try again." }, 502)
   }
 
-  if (!upstream.ok) {
-    return json({ error: "The AI service returned an error. Please try again later." }, 502)
-  }
-
-  let result: { choices?: Array<{ message?: { content?: string } }> }
-  try {
-    result = await upstream.json() as { choices?: Array<{ message?: { content?: string } }> }
-  } catch {
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    !("response" in result) ||
+    typeof result.response !== "string"
+  ) {
     return json({ error: "The AI service returned an invalid response." }, 502)
   }
-  const reply = result.choices?.[0]?.message?.content?.trim()
+
+  const reply = result.response.trim()
   if (!reply) {
     return json({ error: "The AI service returned an empty response." }, 502)
   }
